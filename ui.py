@@ -41,6 +41,24 @@ class RSAVisualizationUI(Frame):
         self.entry.insert(0, 'Hello, RSA!')
         frame_sender.pack(side=LEFT, anchor=CENTER)
 
+        self.frame_pub_k = Frame(base_frame_top)
+        self.arrow_pub_k = Label(self.frame_pub_k, image=self.image_arrow)
+        self.arrow_pub_k.grid(row=0, column=0)
+        self.title_pub_k = Label(self.frame_pub_k, text='Public Key')
+        self.title_pub_k.grid(row=1, column=0)
+        self.text_pub_key = Label(self.frame_pub_k, text=str(self.public))
+        self.text_pub_key.grid(row=2, column=0)
+        self.key_pub_k = Label(self.frame_pub_k, image=self.image_key)
+        self.key_pub_k.grid(row=3, column=0)
+        self.frame_pub_k.pack(side=LEFT, anchor=CENTER)
+
+        frame_security = Frame(base_frame_top)
+        Label(frame_security, image=self.image_security).grid(row=0, column=0)
+        Label(frame_security, text='Encrypted message').grid(row=1, column=0)
+        self.text_cipher = Message(frame_security)
+        self.text_cipher.grid(row=2, column=0)
+        frame_security.pack(side=LEFT, anchor=CENTER)
+
         self.frame_pr_k = Frame(base_frame_top)
         self.arrow_pr_k = Label(self.frame_pr_k, image=self.image_arrow)
         self.arrow_pr_k.grid(row=0, column=0)
@@ -51,24 +69,6 @@ class RSAVisualizationUI(Frame):
         self.key_pr_k = Label(self.frame_pr_k, image=self.image_key)
         self.key_pr_k.grid(row=3, column=0)
         self.frame_pr_k.pack(side=LEFT, anchor=CENTER)
-
-        frame_security = Frame(base_frame_top)
-        Label(frame_security, image=self.image_security).grid(row=0, column=0)
-        Label(frame_security, text='Encrypted message').grid(row=1, column=0)
-        self.text_cipher = Message(frame_security)
-        self.text_cipher.grid(row=2, column=0)
-        frame_security.pack(side=LEFT, anchor=CENTER)
-
-        self.frame_pub_k = Frame(base_frame_top)
-        self.arrow_pub_k = Label(self.frame_pub_k, image=self.image_arrow)
-        self.arrow_pub_k.grid(row=0, column=0)
-        self.title_pub_k = Label(self.frame_pub_k, text=str(self.public))
-        self.title_pub_k.grid(row=1, column=0)
-        self.text_pub_key = Label(self.frame_pub_k, text='Your public key')
-        self.text_pub_key.grid(row=2, column=0)
-        self.key_pub_k = Label(self.frame_pub_k, image=self.image_key)
-        self.key_pub_k.grid(row=3, column=0)
-        self.frame_pub_k.pack(side=LEFT, anchor=CENTER)
 
         frame_receiver = Frame(base_frame_top)
         Label(frame_receiver, image=self.image_user).grid(row=0, column=0)
@@ -85,6 +85,8 @@ class RSAVisualizationUI(Frame):
         base_frame_bottom = Frame(self)
         self.btn_send = Button(self, text='Send', state='disabled', command=self.send_message)
         self.btn_send.pack(side=LEFT, anchor=SW)
+        self.btn_finish = Button(self, text='Finish', state='disabled', command=self.finish_transition)
+        self.btn_finish.pack(side=LEFT, anchor=SW)
         self.process_line = Label(base_frame_bottom, text='Go, press the "Start" button!')
         self.process_line.pack(side=LEFT, padx=20, anchor=CENTER)
         Button(base_frame_bottom, text='Close', command=self.master.destroy).pack(side=RIGHT, anchor=SE)
@@ -111,7 +113,7 @@ class RSAVisualizationUI(Frame):
         self.public, self.private = rsa.generate_keypair(self.p, self.q)
         self.text_pr_key.configure(text=str(self.private))
         self.text_pub_key.configure(text=str(self.public))
-        self.process_line.configure(text='Enter a message to encrypt with your private key and press the "Send" button')
+        self.process_line.configure(text='Enter a message to encrypt with your public key and press the "Send" button')
         time.sleep(1)
         self.btn_send['state'] = 'normal'
 
@@ -128,33 +130,40 @@ class RSAVisualizationUI(Frame):
         self.message = self.entry.get()
         time.sleep(1)
         self.process_line.configure(text='Encrypting...')
-        self.arrow_pr_k.grid()
-        self.title_pr_k.grid()
-        self.text_pr_key.grid()
-        self.key_pr_k.grid()
-        self.cipher = rsa.encrypt(self.private, self.message)
+        self.arrow_pub_k.grid()
+        self.title_pub_k.grid()
+        self.text_pub_key.grid()
+        self.key_pub_k.grid()
+        self.cipher = rsa.encrypt(self.public, self.message)
         time.sleep(2)
         self.process_line.configure(text='Done encrypting!')
         self.text_cipher.configure(text=rsa.get_encrypted_str(self.cipher))
         time.sleep(1)
         self.process_line.configure(text='Sending...')
-        self.arrow_pub_k.grid()
-        self.title_pub_k.grid()
-        self.text_pub_key.grid()
-        self.key_pub_k.grid()
+        self.arrow_pr_k.grid()
+        self.title_pr_k.grid()
+        self.text_pr_key.grid()
+        self.key_pr_k.grid()
         time.sleep(1)
         self.process_line.configure(text='Decrypting...')
-        self.message = rsa.decrypt(self.public, self.cipher)
+        self.message = rsa.decrypt(self.private, self.cipher)
         time.sleep(3)
         self.process_line.configure(text='Done!')
         self.text_decrypted.configure(text=self.message)
         time.sleep(1)
-        self.btn_start['state'] = 'normal'
+        self.btn_send['state'] = 'normal'
 
     def send_message(self):
         thread = Thread(target=self.send_message_thread)
         self.btn_send['state'] = 'disabled'
+        self.btn_finish['state'] = 'normal'
         thread.start()
+
+    def finish_transition(self):
+        self.btn_send['state'] = 'disabled'
+        self.btn_finish['state'] = 'disabled'
+        self.btn_start['state'] = 'normal'
+        self.set_ui()
 
 
 

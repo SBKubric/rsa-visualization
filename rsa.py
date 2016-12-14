@@ -193,21 +193,21 @@ def terminal_mode():
     print('Your public key is ', public, ' and your private key is ', private)
 
     default_msg = 'Hello RSA!'
-    message = input("Enter a message to encrypt with your private key: {}".format(default_msg) + _backspace(
+    message = input("Enter a message to encrypt with your public key: {}".format(default_msg) + _backspace(
         default_msg, p)) or default_msg
 
     print('Your message is: {}\nEncrypting...'.format(message))
 
-    cipher = encrypt(private, message)
+    cipher = encrypt(public, message)
 
     print('Your encrypted message is: ')
 
     print(get_encrypted_str(cipher))
     input('Press enter to decrypt.')
-    print('Decrypting message with public key ', public, ' . . .')
+    print('Decrypting message with private key ', private, ' . . .')
     time.sleep(2)
     print('Your message is:')
-    print(decrypt(public, cipher))
+    print(decrypt(private, cipher))
 
 
 if __name__ == '__main__':
